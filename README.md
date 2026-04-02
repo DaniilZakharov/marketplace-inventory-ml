@@ -15,4 +15,4 @@
 - LLM для интерпретации результатов модели.
 
 ## Как запустить
-(Здесь позже добавим инструкцию)
+Скачать данные с https://www.kaggle.com/competitions/demand-forecasting-kernels-only/overview и вложить в папку data
