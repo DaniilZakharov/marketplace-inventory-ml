@@ -14,8 +14,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Внимание: папка data скопируется, если её нет в .dockerignore
 COPY src/ ./src/
 COPY data/ ./data/
+COPY models/ ./models/
 
+ENV PYTHONPATH=/app
+EXPOSE 8000
+
+CMD ["uvicorn", "src.app:app", "--host", "0.0.0.0", "--port", "8000"]
 # 6. Команда по умолчанию (что делать при запуске контейнера)
 # Сначала готовим данные, потом обучаем модель
 # Вместо запуска скриптов, запускаем сервер на порту 8000
-CMD ["uvicorn", "src.app:app", "--host", "0.0.0.0", "--port", "8000"]

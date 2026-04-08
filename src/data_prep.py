@@ -57,7 +57,7 @@ def prepare_data():
     # Сохранение
     os.makedirs('data', exist_ok=True)
     train.to_csv(output_path, index=False)
-    print(f"Готово! Файл сохранен: {output_path}")
+    print(f"Файл сохранен: {output_path}")
 
 if __name__ == "__main__":
     prepare_data()

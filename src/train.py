@@ -27,7 +27,7 @@ def recursive_forecast_month(model, history_df, forecast_dates_df):
     for day in forecast_days:
         day_rows = forecast_dates_df[forecast_dates_df["date"] == day].copy()
 
-        # ── Пересчитываем лаги вручную ──────────────────────────────────────
+       
         cutoff_date = day - pd.Timedelta(days=31)
         recent = buffer[buffer["date"] >= cutoff_date].copy()
 
@@ -58,18 +58,18 @@ def recursive_forecast_month(model, history_df, forecast_dates_df):
         lag_df = pd.DataFrame(lag_rows)
         day_rows = day_rows.merge(lag_df, on=["store", "item"], how="left")
 
-        # ── ПРЕДСКАЗАНИЕ (Здесь была ошибка!) ───────────────────────────────
+       
         X_day = day_rows[FEATURES]
-        preds = model.predict(X_day) # Теперь это (N, 3)
+        preds = model.predict(X_day)
         preds = np.maximum(preds, 0)
 
         day_rows = day_rows.copy()
         # Раскладываем 3 колонки квантилей
         day_rows["lower_ci"] = preds[:, 0]       # q=0.05
-        day_rows["predicted_sales"] = preds[:, 1] # q=0.50 (медиана)
+        day_rows["predicted_sales"] = preds[:, 1] # медиана
         day_rows["upper_ci"] = preds[:, 2]       # q=0.95
 
-        # ── Обновляем буфер МЕДИАНОЙ ────────────────────────────────────────
+        
         pred_buffer = day_rows[["date", "store", "item"]].copy()
         pred_buffer["sales"] = preds[:, 1] # Для лагов используем медиану
         buffer = pd.concat([buffer, pred_buffer], ignore_index=True)
@@ -81,13 +81,13 @@ def recursive_forecast_month(model, history_df, forecast_dates_df):
 
 def add_lag_features(df):
     df = df.copy()
-    # Создаем лаги (продажи N дней назад)
+    # Создаем лаги
     df['sales_lag_1'] = df.groupby(['store', 'item'])['sales'].shift(1)
     df['sales_lag_7'] = df.groupby(['store', 'item'])['sales'].shift(7)
     df['sales_lag_30'] = df.groupby(['store', 'item'])['sales'].shift(30)
     
-    # Создаем скользящие средние (среднее за последние N дней)
-    # Используем shift(1), чтобы не было утечки данных (не смотреть в сегодня при прогнозе на сегодня)
+    # Создаем скользящие средние
+    # Используем shift(1), чтобы не было утечки данных 
     df['sales_rolling_mean_7'] = df.groupby(['store', 'item'])['sales'].transform(
         lambda x: x.shift(1).rolling(window=7).mean()
     )

@@ -1,8 +1,8 @@
-# Demand Forecasting Project 
+# Demand Forecasting Project / Прогнозирование спроса с управлением рисками дефицита
 
 Проект по прогнозированию спроса на товары https://www.kaggle.com/competitions/demand-forecasting-kernels-only/overview
 
-Цель: минимизация out-of-stock на складах.
+Цель: минимизация out-of-stock на складах. Оптимизация затоваривания склада
 
 ## Основной функционал
 - [ ] EDA и анализ сезонности (день недели, месяц).
@@ -10,18 +10,60 @@
 - [ ] Генерация бизнес-рекомендаций: "Сколько и когда везти на склад".
 
 ## Технологии
-- Python, Pandas, CatBoost.
-- Git, Docker.
-- LLM для интерпретации результатов модели.
+- Core: Python, Pandas, CatBoost.
+- ML Methods: MultiQuantile Regression, Recursive Forecasting, Detrending.
+- Infrastructure: NVIDIA CUDA, Git, Docker.
 
 ## Как запустить
+
+## Docker
+Самый быстрый способ запустить API и пощупать инференс. Образ автоматически скачается с Docker Hub.
+
+bash
+docker run -p 8000:8000 daniiiiiiil/marketplace-inventory-ml
+
+
+## VScode
     Убедитесь, что у вас установлены драйверы NVIDIA и CUDA.
 
     Скачайте данные с https://www.kaggle.com/competitions/demand-forecasting-kernels-only/overview и положите в папку /data.
 
     Установите зависимости: pip install catboost pandas matplotlib.
 
-    Запустите ноутбук 01_eda.ipynb
+   
+## Основной функционал
+[x] 1. Feature Engineering & EDA
+
+    Анализ сезонности (день недели, месяц, годовые тренды).
+
+    Генерация лагов (1, 7, 30 дней) и скользящих средних.
+
+    Глобальные статистики по магазинам и товарам.
+
+[x] 2. Smart ML Model (MultiQuantile)
+
+    Обучение CatBoost с асимметричной функцией потерь (MultiQuantile:alpha=0.05, 0.6, 0.98).
+
+    Рекурсивный прогноз: пошаговое предсказание на 31 день вперед (декабрь 2017).
+
+    Моделирование «страхового запаса» через верхний квантиль.
+
+[x] 3. Business Analytics
+
+    Расчет Service Level (целевой показатель > 99%).
+
+    Оценка Lost Sales и Inventory Excess в денежном/штучном эквиваленте.
+
+    Генератор Purchase Order (план закупок в Excel).
+
+
+## Результаты (Executive Summary)
+
+    Что сделано: Внедрена система динамического страхового запаса.
+
+    Ожидания: Снижение дефицита по сравнению со статическим планированием.
+
+    Результат: Сокращение упущенных продаж (Lost Sales) на 33% при уменьшении объема склада. достигнут Service Level 99.6%.
 
 ## Доделать
  Применить Детрендинг (Detrending):
@@ -31,3 +73,10 @@
     Обучаешь CatBoost предсказывать "остатки" (колебания вокруг этого тренда).
 
     При предсказании складываешь результат.
+    [ ] 4. Продвинутая математика: Detrending (В процессе)
+
+    Шаг 1: Выделение линейного тренда (рост рынка) через LinearRegression или Polyfit.
+
+    Шаг 2: Обучение CatBoost на детерминированных остатках (residuals).
+
+    Шаг 3: Обратное преобразование при инференсе. Это поможет модели не «тупить» на растущих рынках.
