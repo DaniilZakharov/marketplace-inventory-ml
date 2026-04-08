@@ -2,3 +2,6 @@ data/*.csv
 .ipynb_checkpoints/
 __pycache__/
 *.cbm
+
+# CatBoost logs
+catboost_info/

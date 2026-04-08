@@ -1,0 +1,20 @@
+# 1. Берем легкий образ Python
+FROM python:3.11-slim
+
+# 2. Устанавливаем рабочую директорию внутри контейнера
+WORKDIR /app
+
+# 3. Копируем список зависимостей
+COPY requirements.txt .
+
+# 4. Устанавливаем библиотеки
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 5. Копируем папки со скриптами и данными
+# Внимание: папка data скопируется, если её нет в .dockerignore
+COPY src/ ./src/
+COPY data/ ./data/
+
+# 6. Команда по умолчанию (что делать при запуске контейнера)
+# Сначала готовим данные, потом обучаем модель
+CMD ["sh", "-c", "python src/data_prep.py && python src/train.py"]
