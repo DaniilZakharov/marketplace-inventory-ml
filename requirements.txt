@@ -3,3 +3,5 @@ numpy
 catboost
 scikit-learn
 matplotlib
+fastapi
+uvicorn
